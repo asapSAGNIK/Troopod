@@ -1,7 +1,15 @@
 import { chromium } from "playwright";
 
 export async function fetchPageHtml(url: string): Promise<{ html: string; title: string }> {
-  const browser = await chromium.launch({ headless: true });
+  const browserlessToken = process.env.BROWSERLESS_TOKEN;
+  let browser;
+
+  if (browserlessToken) {
+    console.log("Connecting to Browserless...");
+    browser = await chromium.connectOverCDP(`wss://chrome.browserless.io?token=${browserlessToken}`);
+  } else {
+    browser = await chromium.launch({ headless: true });
+  }
   try {
     const context = await browser.newContext({
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

@@ -29,8 +29,12 @@ Ensure you have Node.js installed. You will also need a **Gemini API Key** from 
 Create a `.env.local` file in the root directory:
 
 ```bash
-GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_gemini_key
+# Required for serverless deployment (e.g., Vercel)
+BROWSERLESS_TOKEN=your_browserless_token
 ```
+
+> **Note**: Get your token for free at [browserless.io](https://www.browserless.io/).
 
 ### 3. Install & Run
 
@@ -64,7 +68,7 @@ sequenceDiagram
         F->>S: Fetch & Stamp Landing Page
     end
     A-->>F: Ad Intelligence (JSON)
-    S-->>F: Stamped HTML + Blocks
+    S-->>F: Stamped HTML + Blocksgit
     F->>P: Context (Ad + Blocks)
     P-->>F: Surgical Changes (JSON)
     F->>D: Apply Changes to Stamped IDs
