@@ -65,8 +65,15 @@ export default function Home() {
               />
             </div>
 
-            <button type="submit" id="submit-btn" className="btn" disabled={loading} style={{ width: "100%" }}>
-              {loading ? "Generating Personalization..." : "Optimize Page"}
+            <button type="submit" id="submit-btn" className="btn" disabled={loading} style={{ width: "100%", minHeight: "3.5rem" }}>
+              {loading ? (
+                <div className="loader-container">
+                  <span className="loader"></span>
+                  <span>Generating Personalization...</span>
+                </div>
+              ) : (
+                "Optimize Page"
+              )}
             </button>
             
             {error && (
