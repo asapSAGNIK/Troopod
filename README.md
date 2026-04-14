@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+#  Troopod AI: Ad-to-Landing-Page Personalization Engine
 
-## Getting Started
+Troopod AI is a high-performance personalization engine designed to bridge the gap between ad creatives and landing pages. It analyzes ad visuals using Gemini Vision and surgically modifies the landing page DOM to ensure "Message Match" and "Scent Trail" continuity, significantly boosting conversion rates (CRO).
 
-First, run the development server:
+##  Key Features
+
+-   **AI Ad Vision Analysis**: Uses Google Gemini 2.5 Flash to extract headlines, CTAs, tone, and color palettes from ad images.
+-   **Intelligent DOM Scraping**: Uses Playwright to fetch live landing page content, with a custom parser that identifies semantic blocks (headlines, features, CTAs).
+-   **Deterministic ID Stamping**: Injects temporary `data-tp-id` attributes to guarantee 100% reliable element targeting, bypassing fragile CSS selectors or hashed class names.
+-   **Surgical Personalization**: AI-driven modifications that respect navigation and footer areas while aligning hero headlines and primary CTAs with the ad's promise.
+-   **Interactive Preview**: A dual-view toggle system allows users to flip between the original and personalized landing page versions instantly.
+
+##  Tech Stack
+
+-   **Frontend/Backend**: [Next.js 14 (App Router)](https://nextjs.org/)
+-   **AI Model**: [Google Gemini 2.5 Flash](https://ai.google.dev/)
+-   **Scraping**: [Playwright](https://playwright.dev/) & [Cheerio](https://cheerio.js.org/)
+-   **Validation**: [Zod](https://zod.dev/)
+-   **Styling**: Vanilla CSS (Custom Design System)
+
+##  Getting Started
+
+### 1. Prerequisites
+
+Ensure you have Node.js installed. You will also need a **Gemini API Key** from [Google AI Studio](https://aistudio.google.com/).
+
+### 2. Environment Setup
+
+Create a `.env.local` file in the root directory:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+GEMINI_API_KEY=your_api_key_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Install & Run
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Install Playwright browsers
+npx playwright install chromium
 
-## Learn More
+# Start the development server
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+##  System Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend (Next.js)
+    participant A as Ad Analyzer (Gemini)
+    participant S as Scraper (Playwright)
+    participant P as Personalizer (AI)
+    participant D as DOM Modifier
 
-## Deploy on Vercel
+    U->>F: Upload Ad + Enter URL
+    par Parallel Processing
+        F->>A: Analyze Image Visuals
+        F->>S: Fetch & Stamp Landing Page
+    end
+    A-->>F: Ad Intelligence (JSON)
+    S-->>F: Stamped HTML + Blocks
+    F->>P: Context (Ad + Blocks)
+    P-->>F: Surgical Changes (JSON)
+    F->>D: Apply Changes to Stamped IDs
+    D-->>F: Personalized HTML
+    F-->>U: Live Toggle Preview
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+##  License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is built for the Troopod AI PM Assignment.
