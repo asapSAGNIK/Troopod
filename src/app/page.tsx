@@ -8,13 +8,22 @@ export default function Home() {
   const [result, setResult] = useState<PersonalizeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPersonalized, setShowPersonalized] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-
+    setStatusMessage(null);
+    
     const formData = new FormData(e.currentTarget);
+
+    const timer5s = setTimeout(() => {
+      setStatusMessage("Takes up to 15 seconds...");
+    }, 5000);
+
+    const timer7s = setTimeout(() => {
+      setStatusMessage(null);
+    }, 7000);
 
     try {
       const res = await fetch("/api/personalize", {
@@ -33,7 +42,10 @@ export default function Home() {
     } catch (err: any) {
       setError(err.message);
     } finally {
+      clearTimeout(timer5s);
+      clearTimeout(timer7s);
       setLoading(false);
+      setStatusMessage(null);
     }
   };
 
@@ -69,7 +81,7 @@ export default function Home() {
               {loading ? (
                 <div className="loader-container">
                   <span className="loader"></span>
-                  <span>Generating Personalization...</span>
+                  <span>{statusMessage || "Generating Personalization..."}</span>
                 </div>
               ) : (
                 "Optimize Page"
