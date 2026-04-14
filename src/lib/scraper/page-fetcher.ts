@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "playwright-core";
 
 export async function fetchPageHtml(url: string): Promise<{ html: string; title: string }> {
   const browserlessToken = process.env.BROWSERLESS_TOKEN;
@@ -8,6 +8,7 @@ export async function fetchPageHtml(url: string): Promise<{ html: string; title:
     console.log("Connecting to Browserless...");
     browser = await chromium.connectOverCDP(`wss://chrome.browserless.io?token=${browserlessToken}`);
   } else {
+    console.warn("No BROWSERLESS_TOKEN found, attempting to launch local chromium...");
     browser = await chromium.launch({ headless: true });
   }
   try {
