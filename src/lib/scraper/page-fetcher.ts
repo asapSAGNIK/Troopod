@@ -8,8 +8,8 @@ export async function fetchPageHtml(url: string): Promise<{ html: string; title:
     console.log("Connecting to Browserless...");
     browser = await chromium.connectOverCDP(`wss://chrome.browserless.io?token=${browserlessToken}`);
   } else {
-    console.warn("No BROWSERLESS_TOKEN found, attempting to launch local chromium...");
-    browser = await chromium.launch({ headless: true });
+    // Fail explicitly and loudly if the token is missing
+    throw new Error("CRITICAL: BROWSERLESS_TOKEN is undefined! Please check your Vercel Environment Variables. Make sure the name matches exactly and it is enabled for the environment (Production/Preview) you are testing.");
   }
   try {
     const context = await browser.newContext({
