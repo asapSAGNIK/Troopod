@@ -54,7 +54,8 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     }
     // Also check classes
     const className = ($(el).attr("class") || "").toLowerCase();
-    if (/price|amount|cost/i.test(className) && text.length < 20 && text.includesAny(["$", "€", "£", "₹", "¥"])) {
+    const currencySymbols = ["$", "€", "£", "₹", "¥"];
+    if (/price|amount|cost/i.test(className) && text.length < 20 && currencySymbols.some(sym => text.includes(sym))) {
        addBlock(el, "price", true);
     }
   });
@@ -115,11 +116,6 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
 
   return { blocks, modifiedHtml: $.html() };
 }
-
-// Add a helper to String for cleaner checking
-(String.prototype as any).includesAny = function(arr: string[]) {
-  return arr.some(v => this.includes(v));
-};
 
 
 function getBestSelector($: any, el: any): string {
