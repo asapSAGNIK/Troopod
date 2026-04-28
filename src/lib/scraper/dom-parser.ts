@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 import { PageBlock } from "../types";
 
-export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHtml: string } {
+export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHtml: string, hasTimer: boolean } {
   const $ = cheerio.load(html);
   const blocks: PageBlock[] = [];
   const seen = new Set<any>();
@@ -148,7 +148,15 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
   $("nav").each((i, el: any) => addBlock(el, "navigation", false));
   $("footer").each((i, el: any) => addBlock(el, "footer", false));
 
-  return { blocks, modifiedHtml: $.html() };
+  // Detect existing countdown/timer elements — if found, skip urgency bar injection
+  const timerSelectors = [
+    "[class*='countdown']", "[class*='count-down']", "[class*='timer']",
+    "[class*='flip-clock']", "[class*='flipclock']", "[id*='countdown']",
+    "[id*='timer']", "[data-countdown]", "[data-timer]",
+  ];
+  const hasTimer = timerSelectors.some(sel => $(sel).length > 0);
+
+  return { blocks, modifiedHtml: $.html(), hasTimer };
 }
 
 

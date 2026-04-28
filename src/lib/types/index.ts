@@ -65,6 +65,7 @@ export interface ScrapedPage {
   title: string;
   fullHtml: string;
   blocks: PageBlock[];
+  hasTimer: boolean;       // true if page already has a countdown/timer element
   meta: {
     hasForm: boolean;
     hasPricing: boolean;
@@ -111,11 +112,10 @@ export interface PersonalizationResult {
 // --- AI Strategy Decision (new architecture) ---
 
 export interface StrategyDecision {
-  inject_urgency: boolean;
-  badge_type: "bestseller" | "price_drop" | null;
-  inject_offer_chip: boolean;
-  inject_sticky_cta: boolean;
-  cta_upgrade: string | null;
+  inject_urgency: boolean;         // should urgency bar be injected (app overrides if hasTimer)
+  badge_label: string | null;      // exact badge text to display, e.g. "META OFFICIAL PARTNER"
+  headline_rewrite: string | null; // rewritten H1 text aligned with ad message, or null to keep
+  cta_upgrade: string | null;      // replacement CTA text for low-intent buttons only
   rationale: string;
   confidence: number;
 }

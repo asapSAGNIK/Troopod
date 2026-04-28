@@ -224,27 +224,27 @@ export default function Home() {
             boxShadow: isMobileView ? "0 10px 25px -5px rgba(0, 0, 0, 0.5)" : "none",
             position: "relative",
           }}>
-            {/* Original iframe — always loaded, hidden when personalized */}
+            {/* Original iframe */}
             <iframe
               srcDoc={result.originalHtml}
               title="Original Page"
               sandbox="allow-scripts"
               style={{
                 width: "100%",
-                height: isMobileView ? "844px" : "80vh",
+                height: isMobileView ? "844px" : "calc(100vh - 110px)",
                 border: "none",
                 background: "#fff",
                 display: showPersonalized ? "none" : "block",
               }}
             />
-            {/* Personalized iframe — always loaded, hidden when showing original */}
+            {/* Personalized iframe */}
             <iframe
               srcDoc={result.modifiedHtml}
               title="Personalized Page"
               sandbox="allow-scripts"
               style={{
                 width: "100%",
-                height: isMobileView ? "844px" : "80vh",
+                height: isMobileView ? "844px" : "calc(100vh - 110px)",
                 border: "none",
                 background: "#fff",
                 display: showPersonalized ? "block" : "none",
@@ -252,37 +252,6 @@ export default function Home() {
             />
           </div>
 
-          {/* Changes Summary */}
-          <div className="changes-list">
-            <h2 style={{ marginBottom: "1.5rem" }}>
-              Personalization Strategy 
-              <span className="badge" style={{ marginLeft: "0.75rem" }}>
-                {result.changes.length} changes
-              </span>
-            </h2>
-            <div className="card">
-              <p style={{ marginBottom: "2rem", fontSize: "1.1rem" }}>{result.summary}</p>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                {result.changes.map((change, i) => (
-                  <div key={i} className="change-item">
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                      <span className="badge">{change.category.replace(/_/g, " ")}</span>
-                      <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                        {Math.round(change.confidence * 100)}% confidence
-                      </span>
-                    </div>
-                    <p style={{ fontWeight: "600", fontSize: "0.9rem" }}>{change.croRationale}</p>
-                    <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
-                      <span style={{ color: "#ef4444" }}>— {change.originalValue}</span>
-                      <br />
-                      <span style={{ color: "#22c55e" }}>+ {change.newValue}</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </main>

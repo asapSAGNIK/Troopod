@@ -32,14 +32,15 @@ export async function POST(req: NextRequest) {
     const scrapingStartTime = Date.now();
     
     // Phase 3: Personalization
-    const { blocks, modifiedHtml: htmlWithIds } = parsePageBlocks(originalHtml);
-    console.log(`Parsed ${blocks.length} blocks. Modifiable: ${blocks.filter(b => b.isModifiable).length}`);
+    const { blocks, modifiedHtml: htmlWithIds, hasTimer } = parsePageBlocks(originalHtml);
+    console.log(`Parsed ${blocks.length} blocks. Has existing timer: ${hasTimer}`);
     
     const personalization = await personalizeForAd(adAnalysis, {
       url: landingPageUrl,
       title,
       fullHtml: htmlWithIds,
       blocks,
+      hasTimer,
       meta: { hasForm: false, hasPricing: false, primaryColor: null }
     });
     
