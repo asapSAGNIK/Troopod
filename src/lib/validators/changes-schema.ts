@@ -16,6 +16,7 @@ export const changeInstructionSchema = z.object({
 });
 
 export const personalizationResultSchema = z.object({
+  thinking: z.string().optional(),
   changes: z.array(changeInstructionSchema).catch([]),
   summary: z.string().catch("Personalization changes applied."),
   overallConfidence: z.number().min(0).max(1).catch(0.7),
