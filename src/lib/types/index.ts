@@ -42,6 +42,11 @@ export type PageBlockType =
   | "footer"
   | "image"
   | "section"
+  | "announcement"
+  | "price"
+  | "reviews"
+  | "product_image"
+  | "badge_container"
   | "other";
 
 export interface PageBlock {
@@ -52,6 +57,7 @@ export interface PageBlock {
   html: string;
   isModifiable: boolean;
   styles: Record<string, string>;
+  order?: number;
 }
 
 export interface ScrapedPage {
@@ -80,7 +86,8 @@ export type ChangeCategory =
   | "visual_continuity"
   | "social_proof"
   | "above_the_fold"
-  | "scent_trail";
+  | "scent_trail"
+  | "urgency";
 
 export interface ChangeInstruction {
   blockId: string;
@@ -99,6 +106,18 @@ export interface PersonalizationResult {
   summary: string;
   overallConfidence: number;
   warnings: string[];
+}
+
+// --- AI Strategy Decision (new architecture) ---
+
+export interface StrategyDecision {
+  inject_urgency: boolean;
+  badge_type: "bestseller" | "price_drop" | null;
+  inject_offer_chip: boolean;
+  inject_sticky_cta: boolean;
+  cta_upgrade: string | null;
+  rationale: string;
+  confidence: number;
 }
 
 // --- API Request/Response ---
