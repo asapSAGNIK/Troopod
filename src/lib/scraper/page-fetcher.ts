@@ -1,7 +1,7 @@
 import { chromium } from "playwright-core";
 
 const SCRAPE_CACHE = new Map<string, { html: string; title: string; timestamp: number }>();
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const CACHE_TTL = 1 * 60 * 1000; // 1 minute
 
 export async function fetchPageHtml(url: string): Promise<{ html: string; title: string }> {
   // Check cache first
