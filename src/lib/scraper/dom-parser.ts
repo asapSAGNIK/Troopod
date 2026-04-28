@@ -28,21 +28,65 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     seen.add(el);
   };
 
-  // 1. Headlines
+  // 1. Announcement Bar (heuristic: top fixed/absolute, or first div with text)
+  $("div, section, header").first().each((i, el: any) => {
+    const text = $(el).text().trim();
+    const className = ($(el).attr("class") || "").toLowerCase();
+    const id = ($(el).attr("id") || "").toLowerCase();
+    if (/announcement|topbar|notification|promo|alert/i.test(className + id) || (text.length > 0 && text.length < 100 && i === 0)) {
+       addBlock(el, "announcement", true);
+    }
+  });
+
+  // 2. Headlines
   $("h1, h2, h3, h4").each((i, el: any) => {
     const text = $(el).text().trim();
     if (!text || text.length < 2) return;
     addBlock(el, el.name === "h1" ? "headline" : "subheadline", !isInsideProtected(el));
   });
 
-  // 2. Paragraphs
+  // 3. Prices
+  $("*").each((i, el: any) => {
+    const text = $(el).text().trim();
+    // Heuristic for price: starts with currency symbol, followed by numbers
+    if (/^[\\$€£₹¥]\\s?\\d+([.,]\\d{2})?$/.test(text)) {
+      addBlock(el, "price", true);
+    }
+    // Also check classes
+    const className = ($(el).attr("class") || "").toLowerCase();
+    if (/price|amount|cost/i.test(className) && text.length < 20 && text.includesAny(["$", "€", "£", "₹", "¥"])) {
+       addBlock(el, "price", true);
+    }
+  });
+
+  // 4. Reviews/Ratings
+  $("*").each((i, el: any) => {
+    const text = $(el).text().trim();
+    const className = ($(el).attr("class") || "").toLowerCase();
+    if (/review|rating|star|feedback/i.test(className + " " + text.toLowerCase())) {
+       if (text.length > 0 && text.length < 50) {
+         addBlock(el, "reviews", true);
+       }
+    }
+  });
+
+  // 5. Product Images
+  $("img").each((i, el: any) => {
+    const className = ($(el).attr("class") || "").toLowerCase();
+    const alt = ($(el).attr("alt") || "").toLowerCase();
+    if (/product|main|hero|primary|featured/i.test(className + alt)) {
+       addBlock(el, "product_image", true);
+    }
+  });
+
+  // 6. Paragraphs/Features
   $("p").each((i, el: any) => {
     const text = $(el).text().trim();
     if (!text || text.length < 20 || text.length > 500 || isInsideProtected(el)) return;
     addBlock(el, "feature", true);
   });
 
-  // 3. CTAs
+  // 7. CTAs
   $("button, [role='button'], a").each((i, el: any) => {
     const text = $(el).text().trim();
     if (!text || text.length > 40 || text.length < 2 || isInsideProtected(el)) return;
@@ -56,7 +100,7 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     addBlock(el, "cta", true);
   });
 
-  // 4. Hero
+  // 8. Hero
   $("section, div, [role='banner']").each((i, el: any) => {
     const className = ($(el).attr("class") || "").toLowerCase();
     const id = ($(el).attr("id") || "").toLowerCase();
@@ -65,12 +109,17 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     }
   });
 
-  // 5. Protected
+  // 9. Protected
   $("nav").each((i, el: any) => addBlock(el, "navigation", false));
   $("footer").each((i, el: any) => addBlock(el, "footer", false));
 
   return { blocks, modifiedHtml: $.html() };
 }
+
+// Add a helper to String for cleaner checking
+(String.prototype as any).includesAny = function(arr: string[]) {
+  return arr.some(v => this.includes(v));
+};
 
 
 function getBestSelector($: any, el: any): string {

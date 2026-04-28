@@ -27,7 +27,7 @@ export function applyChanges(
     try {
       switch (change.action) {
         case "replace_text":
-          console.log(`APPLY: [${change.blockId}] "${$el.text().trim().substring(0, 40)}" → "${change.newValue.substring(0, 40)}"`);
+          console.log(`APPLY: [${change.blockId}] replace_text → "${change.newValue.substring(0, 40)}..."`);
           $el.text(change.newValue);
           break;
         case "replace_html":
@@ -37,12 +37,23 @@ export function applyChanges(
         case "update_style":
           if (change.field) {
             console.log(`APPLY: [${change.blockId}] style ${change.field} = ${change.newValue}`);
+            // Use .attr("style", ...) or .css()? .css() is safer for specific properties
             $el.css(change.field, change.newValue);
           }
           break;
         case "add_element":
-          console.log(`APPLY: [${change.blockId}] add_element`);
-          $el.append(change.newValue);
+          const position = change.field || "append";
+          console.log(`APPLY: [${change.blockId}] add_element (${position})`);
+          
+          if (position === "before") {
+            $el.before(change.newValue);
+          } else if (position === "after") {
+            $el.after(change.newValue);
+          } else if (position === "prepend") {
+            $el.prepend(change.newValue);
+          } else {
+            $el.append(change.newValue);
+          }
           break;
       }
     } catch (err) {

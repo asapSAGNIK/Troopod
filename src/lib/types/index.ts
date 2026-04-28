@@ -42,6 +42,11 @@ export type PageBlockType =
   | "footer"
   | "image"
   | "section"
+  | "announcement"
+  | "price"
+  | "reviews"
+  | "product_image"
+  | "badge_container"
   | "other";
 
 export interface PageBlock {
