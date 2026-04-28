@@ -14,7 +14,7 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     blocks.push({
       id: bodyId,
       selector: `[data-tp-id="${bodyId}"]`,
-      type: "section" as any,
+      type: "other" as any,
       content: "page_wrapper_header_area",
       html: "<body>",
       isModifiable: true,

@@ -226,7 +226,7 @@ export default function Home() {
             <iframe 
               srcDoc={showPersonalized ? result.modifiedHtml : result.originalHtml} 
               title={showPersonalized ? "Personalized Page" : "Original Page"}
-              sandbox="allow-same-origin"
+              sandbox="allow-same-origin allow-scripts"
               style={{
                 width: "100%",
                 height: isMobileView ? "844px" : "80vh",
