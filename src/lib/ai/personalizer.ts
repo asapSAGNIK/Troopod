@@ -36,13 +36,13 @@ export async function personalizeForAd(
     hour12: false,
   });
 
-  // Pre-hydrated HTML overlays — no AI guesswork on values
+  // Pre-hydrated HTML overlays — countdown uses inline JS, no external deps
+  const targetIso = targetDate.toISOString();
   const overlayMenu = {
-    urgency_bar: `<div data-tp-inject="urgency" style="background: ${brandColor}; color: #fff; text-align: center; padding: 10px 16px; font-weight: 700; font-family: sans-serif; position: sticky; top: 0; z-index: 9999; font-size: 13px; letter-spacing: 0.4px;">⚡ ${offerText} — ENDS IN ${timeStr}</div>`,
+    urgency_bar: `<div data-tp-inject="urgency" style="background: ${brandColor}; color: #fff; text-align: center; padding: 10px 16px; font-weight: 700; font-family: sans-serif; position: sticky; top: 0; z-index: 9999; font-size: 13px; letter-spacing: 0.4px;">⚡ ${offerText} — ENDS IN <span id="tp-countdown">--:--:--</span><script>(function(){var t=new Date("${targetIso}");function u(){var n=new Date(),d=t-n;if(d<=0){document.getElementById("tp-countdown").textContent="00:00:00";return;}var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);document.getElementById("tp-countdown").textContent=[h,m,s].map(function(x){return String(x).padStart(2,"0");}).join(":");}u();setInterval(u,1000);})()</\/script></div>`,
     bestseller_badge: `<span data-tp-inject="badge-best" style="display:inline-block; background:#f59e0b; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-weight:700; margin-bottom:8px; letter-spacing:0.5px;">★ BESTSELLER</span><br>`,
     price_drop_badge: `<span data-tp-inject="badge-drop" style="display:inline-block; background:#ef4444; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-weight:700; margin-bottom:8px; letter-spacing:0.5px;">↓ PRICE DROP</span><br>`,
     offer_chip: `<span data-tp-inject="offer-chip" style="display:inline-block; background:#22c55e; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700; margin-left:8px; vertical-align:middle;">${discountText}</span>`,
-    sticky_cta: `<div data-tp-inject="sticky-cta" style="position:fixed; bottom:0; left:0; right:0; background:#fff; padding:12px 20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); z-index:9998; display:flex; justify-content:center;"><button onclick="window.scrollTo({top:0,behavior:'smooth'})" style="background:${brandColor}; color:#fff; border:none; padding:14px; border-radius:8px; font-weight:700; width:100%; font-size:16px; cursor:pointer; max-width:480px;">${adAnalysis.cta || "Shop Now"} →</button></div>`
   };
 
   // --- PHASE 2: FIND ANCHOR BLOCKS (app logic, deterministic) ---
@@ -140,7 +140,9 @@ export async function personalizeForAd(
   }
 
   // 4. CTA upgrade — only if page CTA is low intent
-  if (strategy.cta_upgrade && ctaBlock && !isHighIntent(ctaText)) {
+  const LOW_INTENT_WORDS = ["learn more", "read more", "find out", "discover", "see more", "view details"];
+  const isLowIntent = LOW_INTENT_WORDS.some(w => ctaText.toLowerCase().includes(w));
+  if (strategy.cta_upgrade && ctaBlock && !isHighIntent(ctaText) && isLowIntent) {
     changes.push({
       blockId: ctaBlock.id,
       selector: ctaBlock.selector,
@@ -153,20 +155,7 @@ export async function personalizeForAd(
     });
   }
 
-  // 5. Sticky CTA — always at bottom
-  if (strategy.inject_sticky_cta && bodyBlock) {
-    changes.push({
-      blockId: "block-body",
-      selector: "[data-tp-id='block-body']",
-      action: "add_element",
-      field: "append",
-      originalValue: "",
-      newValue: overlayMenu.sticky_cta,
-      croRationale: "Sticky CTA ensures conversion opportunity is always visible, especially on mobile",
-      confidence: 0.97,
-      category: "above_the_fold",
-    });
-  }
+  // Sticky CTA removed — not needed per product decision
 
   console.log(`Applied ${changes.length} overlay changes.`);
 
