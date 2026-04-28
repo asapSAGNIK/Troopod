@@ -61,12 +61,12 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     seen.add(el);
   };
 
-  // 1. Announcement Bar (heuristic)
-  $("div, section, header").first().each((i, el: any) => {
-    const text = $(el).text().trim();
+  // 1. Announcement Bar (STRICT — only match elements explicitly labeled as announcement/promo bars)
+  // WARNING: Do NOT use "first element" heuristic — it incorrectly marks Shopify root wrapper divs
+  $("div, section, header, aside").each((i, el: any) => {
     const className = ($(el).attr("class") || "").toLowerCase();
     const id = ($(el).attr("id") || "").toLowerCase();
-    if (/announcement|topbar|notification|promo|alert/i.test(className + id) || (text.length > 0 && text.length < 100 && i === 0)) {
+    if (/announcement|topbar|top-bar|notification-bar|promo-bar|alert-bar|site-notice/i.test(className + " " + id)) {
        addBlock(el, "announcement", true);
     }
   });
