@@ -37,7 +37,6 @@ export function applyChanges(
         case "update_style":
           if (change.field) {
             console.log(`APPLY: [${change.blockId}] style ${change.field} = ${change.newValue}`);
-            // Use .attr("style", ...) or .css()? .css() is safer for specific properties
             $el.css(change.field, change.newValue);
           }
           break;

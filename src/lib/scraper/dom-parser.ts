@@ -13,6 +13,21 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
 
   const addBlock = (el: any, type: string, modifiable: boolean) => {
     if (seen.has(el)) return;
+
+    // Suppression: If a parent is already a block, don't add this child (prevents overlap)
+    // Exception: If the child is a fundamentally different type (e.g., CTA inside a Hero)
+    const protectedTypes = ["hero", "section", "announcement"];
+    const hasProtectedParent = $(el).parents().toArray().some((parent: any) => {
+        const parentId = $(parent).attr("data-tp-id");
+        if (!parentId) return false;
+        const parentBlock = blocks.find(b => b.id === parentId);
+        return parentBlock && protectedTypes.includes(parentBlock.type);
+    });
+
+    if (hasProtectedParent && !["cta", "price", "reviews"].includes(type)) {
+       return;
+    }
+
     const id = `block-${blocks.length}`;
     $(el).attr("data-tp-id", id);
     
@@ -28,7 +43,7 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     seen.add(el);
   };
 
-  // 1. Announcement Bar (heuristic: top fixed/absolute, or first div with text)
+  // 1. Announcement Bar (heuristic)
   $("div, section, header").first().each((i, el: any) => {
     const text = $(el).text().trim();
     const className = ($(el).attr("class") || "").toLowerCase();
@@ -45,26 +60,25 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     addBlock(el, el.name === "h1" ? "headline" : "subheadline", !isInsideProtected(el));
   });
 
-  // 3. Prices
-  $("*").each((i, el: any) => {
+  // 3. Prices (Scoped)
+  $("span, div, p, b, strong").each((i, el: any) => {
     const text = $(el).text().trim();
-    // Heuristic for price: starts with currency symbol, followed by numbers
-    if (/^[\\$€£₹¥]\\s?\\d+([.,]\\d{2})?$/.test(text)) {
-      addBlock(el, "price", true);
-    }
-    // Also check classes
     const className = ($(el).attr("class") || "").toLowerCase();
     const currencySymbols = ["$", "€", "£", "₹", "¥"];
-    if (/price|amount|cost/i.test(className) && text.length < 20 && currencySymbols.some(sym => text.includes(sym))) {
+    
+    const isCurrencyText = /^[\\$€£₹¥]\\s?\\d+([.,]\\d{2})?$/.test(text);
+    const hasPriceClass = /price|amount|cost|current-price/i.test(className);
+
+    if (isCurrencyText || (hasPriceClass && text.length < 20 && currencySymbols.some(sym => text.includes(sym)))) {
        addBlock(el, "price", true);
     }
   });
 
-  // 4. Reviews/Ratings
-  $("*").each((i, el: any) => {
+  // 4. Reviews/Ratings (Scoped)
+  $("div, span, a, p").each((i, el: any) => {
     const text = $(el).text().trim();
     const className = ($(el).attr("class") || "").toLowerCase();
-    if (/review|rating|star|feedback/i.test(className + " " + text.toLowerCase())) {
+    if (/review|rating|star|feedback/i.test(className)) {
        if (text.length > 0 && text.length < 50) {
          addBlock(el, "reviews", true);
        }

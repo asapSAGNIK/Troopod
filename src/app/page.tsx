@@ -8,6 +8,7 @@ export default function Home() {
   const [result, setResult] = useState<PersonalizeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPersonalized, setShowPersonalized] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -103,8 +104,56 @@ export default function Home() {
               ← Start Over
             </button>
 
-            {/* Toggle Switch */}
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+              {/* Device Toggle */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#27272a", padding: "0.25rem", borderRadius: "0.5rem" }}>
+                <button
+                  onClick={() => setIsMobileView(false)}
+                  style={{
+                    background: !isMobileView ? "#3f3f46" : "transparent",
+                    border: "none",
+                    borderRadius: "0.25rem",
+                    padding: "0.4rem",
+                    cursor: "pointer",
+                    color: !isMobileView ? "#fff" : "var(--text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s"
+                  }}
+                  title="Desktop View"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setIsMobileView(true)}
+                  style={{
+                    background: isMobileView ? "#3f3f46" : "transparent",
+                    border: "none",
+                    borderRadius: "0.25rem",
+                    padding: "0.4rem",
+                    cursor: "pointer",
+                    color: isMobileView ? "#fff" : "var(--text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s"
+                  }}
+                  title="Mobile View"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Toggle Switch */}
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <span style={{ 
                 fontSize: "0.9rem", 
                 fontWeight: !showPersonalized ? 700 : 400,
@@ -150,6 +199,7 @@ export default function Home() {
                 Personalized
               </span>
             </div>
+            </div>
 
             <span style={{ 
               fontSize: "0.75rem", 
@@ -167,7 +217,11 @@ export default function Home() {
             borderRadius: "0.75rem", 
             overflow: "hidden", 
             border: showPersonalized ? "2px solid var(--primary)" : "2px solid var(--border)",
-            transition: "border-color 0.3s"
+            transition: "all 0.3s",
+            width: isMobileView ? "390px" : "100%",
+            margin: "0 auto",
+            backgroundColor: "#fff",
+            boxShadow: isMobileView ? "0 10px 25px -5px rgba(0, 0, 0, 0.5)" : "none"
           }}>
             <iframe 
               srcDoc={showPersonalized ? result.modifiedHtml : result.originalHtml} 
@@ -175,7 +229,7 @@ export default function Home() {
               sandbox="allow-same-origin"
               style={{
                 width: "100%",
-                height: "80vh",
+                height: isMobileView ? "844px" : "80vh",
                 border: "none",
                 background: "#fff",
               }}
