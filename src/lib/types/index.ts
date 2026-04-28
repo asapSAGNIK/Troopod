@@ -57,6 +57,7 @@ export interface PageBlock {
   html: string;
   isModifiable: boolean;
   styles: Record<string, string>;
+  order?: number;
 }
 
 export interface ScrapedPage {

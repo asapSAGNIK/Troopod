@@ -6,6 +6,23 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
   const blocks: PageBlock[] = [];
   const seen = new Set<any>();
 
+  // Inject a body block first — allows urgency bar to be prepended to entire page
+  const bodyEl = $("body").get(0);
+  if (bodyEl) {
+    const bodyId = "block-body";
+    $(bodyEl).attr("data-tp-id", bodyId);
+    blocks.push({
+      id: bodyId,
+      selector: `[data-tp-id="${bodyId}"]`,
+      type: "section" as any,
+      content: "body",
+      html: "",
+      isModifiable: true,
+      styles: {},
+    });
+    seen.add(bodyEl);
+  }
+
   // Helper: check if element is inside nav/header/footer
   const isInsideProtected = (el: any): boolean => {
     return $(el).parents("nav, header, footer").length > 0;
@@ -39,6 +56,7 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
       html: $(el).html() || "",
       isModifiable: modifiable,
       styles: {},
+      order: blocks.length, // Track visual order
     });
     seen.add(el);
   };
@@ -66,10 +84,11 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     const className = ($(el).attr("class") || "").toLowerCase();
     const currencySymbols = ["$", "€", "£", "₹", "¥"];
     
-    const isCurrencyText = /^[\\$€£₹¥]\\s?\\d+([.,]\\d{2})?$/.test(text);
-    const hasPriceClass = /price|amount|cost|current-price/i.test(className);
+    // Fixed: correctly escaped regex for currency symbols
+    const isCurrencyText = /^[$€£₹¥Rs.]+\s?[\d,.]+$/.test(text);
+    const hasPriceClass = /price|amount|cost|current-price|money/i.test(className);
 
-    if (isCurrencyText || (hasPriceClass && text.length < 20 && currencySymbols.some(sym => text.includes(sym)))) {
+    if (isCurrencyText || (hasPriceClass && text.length < 25 && /\d/.test(text))) {
        addBlock(el, "price", true);
     }
   });
@@ -101,15 +120,16 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
     addBlock(el, "feature", true);
   });
 
-  // 7. CTAs
+  // 7. CTAs — broad detection to ensure CTA blocks always exist
   $("button, [role='button'], a").each((i, el: any) => {
     const text = $(el).text().trim();
-    if (!text || text.length > 40 || text.length < 2 || isInsideProtected(el)) return;
+    if (!text || text.length > 50 || text.length < 2 || isInsideProtected(el)) return;
 
     if (el.name === "a") {
       const className = ($(el).attr("class") || "").toLowerCase();
       const hasCtaClass = /btn|button|cta|action|shop|buy|order|signup|start/i.test(className);
-      const hasCtaText = /shop|buy|get|start|sign|order|download|try|learn|view|explore|add to/i.test(text);
+      // Expanded: includes learn more, view, add to cart, customize, pre-order, explore
+      const hasCtaText = /shop|buy|get|start|sign|order|download|try|learn|view|explore|add to|customize|pre-order|grab|claim|book|reserve/i.test(text);
       if (!hasCtaClass && !hasCtaText) return;
     }
     addBlock(el, "cta", true);
