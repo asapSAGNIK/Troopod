@@ -79,9 +79,31 @@ export async function personalizeForAd(
   // --- PHASE 2: FIND ANCHOR BLOCKS ---
   const bodyBlock = modifiableBlocks.find(b => b.id === "block-body");
   const headlineBlock = modifiableBlocks.find(b => b.type === "headline");
-  const priceBlock = modifiableBlocks.find(b => b.type === "price");
+  const allPriceBlocks = modifiableBlocks.filter(b => b.type === "price");
+  const priceBlock = allPriceBlocks[0];
   const ctaBlock = modifiableBlocks.find(b => b.type === "cta");
   const ctaText = ctaBlock?.content || "";
+
+  // Compute real discount % from page prices (e.g. Rs. 2,997 → Rs. 999 = 67% OFF)
+  const extractNum = (text: string): number | null => {
+    const match = text.replace(/,/g, "").match(/[\d.]+/);
+    return match ? parseFloat(match[0]) : null;
+  };
+  const pagePrices = allPriceBlocks
+    .map(b => extractNum(b.content))
+    .filter((n): n is number => n !== null && n > 0);
+  let finalDiscountLabel = discountLabel; // fallback to AI-extracted
+  if (pagePrices.length >= 2) {
+    const maxPrice = Math.max(...pagePrices);
+    const minPrice = Math.min(...pagePrices);
+    if (maxPrice > minPrice) {
+      const pct = Math.round(((maxPrice - minPrice) / maxPrice) * 100);
+      if (pct >= 5 && pct <= 95) finalDiscountLabel = `${pct}% OFF`;
+    }
+  }
+
+  // Update offer chip with real computed discount
+  overlayMenu.offer_chip = `<div data-tp-inject="offer-chip" style="display:inline-flex; align-items:center; gap:6px; background:#e11d48; color:#fff; padding:8px 16px; border-radius:6px; font-size:14px; font-weight:800; margin-bottom:10px; letter-spacing:0.5px; box-shadow:0 2px 8px rgba(225,29,72,0.35);">🏷️ ${finalDiscountLabel} — Today Only</div><br>`;
 
   console.log("Anchor blocks found:", {
     body: !!bodyBlock,
@@ -175,17 +197,18 @@ export async function personalizeForAd(
     });
   }
 
-  // 4. Offer chip next to price
-  if (priceBlock) {
+  // 4. Offer chip — injected BEFORE the CTA (guaranteed visible, not inside flex price container)
+  // This also creates a deal highlight at the critical decision point right above the button
+  if (ctaBlock) {
     changes.push({
-      blockId: priceBlock.id,
-      selector: priceBlock.selector,
+      blockId: ctaBlock.id,
+      selector: ctaBlock.selector,
       action: "add_element",
-      field: "after",
+      field: "before",
       originalValue: "",
       newValue: overlayMenu.offer_chip,
-      croRationale: "Prominent discount badge next to price anchors the deal and amplifies urgency",
-      confidence: 0.92,
+      croRationale: `Discount badge (${finalDiscountLabel}) placed above CTA reinforces deal value at conversion moment`,
+      confidence: 0.94,
       category: "message_match",
     });
   }
