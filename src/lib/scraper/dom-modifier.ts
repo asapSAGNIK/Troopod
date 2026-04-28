@@ -28,13 +28,15 @@ export function applyChanges(
       switch (change.action) {
         case "replace_text":
           console.log(`APPLY: [${change.blockId}] replace_text → "${change.newValue.substring(0, 40)}..."`);
-          // Only replace text if element is a leaf (no child elements) to avoid destroying inner HTML
-          if ($el.children().length === 0) {
+          const tagName = $el.get(0)?.tagName?.toLowerCase() || "";
+          if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tagName)) {
+            // For headings, always replace the entire text (destroys inner spans, which is usually desired for a clean rewrite)
+            $el.text(change.newValue);
+          } else if ($el.children().length === 0) {
             $el.text(change.newValue);
           } else {
             // Replace only the first direct text node, preserving child elements (spans, icons, etc.)
             $el.contents().filter((_, el) => {
-              // Cheerio nodes have a 'type' property; 'text' indicates a text node
               return (el as any).type === "text" || (el as any).nodeType === 3;
             }).first().replaceWith(change.newValue);
           }

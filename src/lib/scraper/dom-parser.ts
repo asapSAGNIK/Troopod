@@ -150,9 +150,9 @@ export function parsePageBlocks(html: string): { blocks: PageBlock[], modifiedHt
 
   // Detect existing countdown/timer elements — if found, skip urgency bar injection
   const timerSelectors = [
-    "[class*='countdown']", "[class*='count-down']", "[class*='timer']",
-    "[class*='flip-clock']", "[class*='flipclock']", "[id*='countdown']",
-    "[id*='timer']", "[data-countdown]", "[data-timer]",
+    "[class*='countdown']", "[class*='count-down']",
+    "[class*='flip-clock']", "[class*='flipclock']",
+    "[data-countdown]"
   ];
   const hasTimer = timerSelectors.some(sel => $(sel).length > 0);
 

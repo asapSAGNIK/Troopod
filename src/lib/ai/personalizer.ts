@@ -146,29 +146,25 @@ export async function personalizeForAd(
     });
   }
 
-  // 2. Badge — AI picks the exact label (relevant to page type + ad claims)
-  if (strategy.badge_label && headlineBlock) {
-    const badgeBg = isProductPage ? "#f59e0b" : "#6366f1";
-    const badgeHtml = `<div data-tp-inject="badge-label" style="display:inline-flex; align-items:center; gap:6px; background:${badgeBg}; color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:800; margin-bottom:10px; letter-spacing:0.6px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">${strategy.badge_label}</div><br>`;
+  // 2. Badge — deterministic Bestseller for product pages, AI badge for non-product pages
+  // Wrapping in display:block ensures it doesn't get messed up if injected inside a flex header
+  if (isProductPage && headlineBlock) {
+    const bestsellerHtml = `<div style="display:block; width:100%; margin-bottom:12px;"><div data-tp-inject="badge-best" style="display:inline-flex; align-items:center; gap:6px; background:#f59e0b; color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:800; letter-spacing:0.6px; box-shadow:0 2px 6px rgba(245,158,11,0.4);">★ BESTSELLER</div></div>`;
+    changes.push({
+      blockId: headlineBlock.id, selector: headlineBlock.selector,
+      action: "add_element", field: "before", originalValue: "",
+      newValue: bestsellerHtml,
+      croRationale: "Bestseller badge builds trust for product pages",
+      confidence: 0.95, category: "social_proof",
+    });
+  } else if (!isProductPage && strategy.badge_label && headlineBlock) {
+    const badgeHtml = `<div style="display:block; width:100%; margin-bottom:12px;"><div data-tp-inject="badge-label" style="display:inline-flex; align-items:center; gap:6px; background:#6366f1; color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:800; letter-spacing:0.6px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">${strategy.badge_label}</div></div>`;
     changes.push({
       blockId: headlineBlock.id, selector: headlineBlock.selector,
       action: "add_element", field: "before", originalValue: "",
       newValue: badgeHtml,
       croRationale: `Badge "${strategy.badge_label}" creates immediate credibility signal matching ad claims`,
       confidence: 0.92, category: "social_proof",
-    });
-  }
-
-  // 3. Bestseller badge — deterministic for product pages (has price = is product)
-  if (isProductPage && headlineBlock && !strategy.badge_label) {
-    // Only inject if AI didn't already supply a badge (avoid double badge)
-    const bestsellerHtml = `<div data-tp-inject="badge-best" style="display:inline-flex; align-items:center; gap:6px; background:#f59e0b; color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:800; margin-bottom:10px; letter-spacing:0.6px; box-shadow:0 2px 6px rgba(245,158,11,0.4);">★ BESTSELLER</div><br>`;
-    changes.push({
-      blockId: headlineBlock.id, selector: headlineBlock.selector,
-      action: "add_element", field: "before", originalValue: "",
-      newValue: bestsellerHtml,
-      croRationale: "Bestseller badge builds trust for product pages",
-      confidence: 0.90, category: "social_proof",
     });
   }
 
