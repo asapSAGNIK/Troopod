@@ -63,7 +63,7 @@ export async function personalizeForAd(
 </div>`,
 
     // Countdown script — injected SEPARATELY to avoid Cheerio HTML parsing issues
-    countdown_script: `<script data-tp-inject="cd-script">(function(){var e=new Date("${targetIso}");function t(){var n=new Date(),d=Math.max(0,e-n);var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);var p=function(x){return String(x).padStart(2,"0");};var eh=document.getElementById("tp-cd-h"),em=document.getElementById("tp-cd-m"),es=document.getElementById("tp-cd-s");if(eh)eh.textContent=p(h);if(em)em.textContent=p(m);if(es)es.textContent=p(s);}t();setInterval(t,1000);})()</script>`,
+    countdown_script: `<script data-tp-inject="cd-script">(function(){if(window.__tpTimer)clearInterval(window.__tpTimer);var e=new Date("${targetIso}");function t(){var n=new Date(),d=Math.max(0,e-n);var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);var p=function(x){return String(x).padStart(2,"0");};var eh=document.getElementById("tp-cd-h"),em=document.getElementById("tp-cd-m"),es=document.getElementById("tp-cd-s");if(eh)eh.textContent=p(h);if(em)em.textContent=p(m);if(es)es.textContent=p(s);}t();window.__tpTimer=setInterval(t,1000);})()</script>`,
 
     // Badge — bold pill above the headline
     bestseller_badge: `<div data-tp-inject="badge-best" style="display:inline-flex; align-items:center; gap:6px; background:#f59e0b; color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:800; margin-bottom:10px; letter-spacing:0.6px; box-shadow:0 2px 6px rgba(245,158,11,0.4);">★ BESTSELLER</div><br>`,

@@ -212,26 +212,42 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Full-width iframe */}
+          {/* Dual iframes — CSS visibility toggle for instant switching, no reload */}
           <div style={{ 
             borderRadius: "0.75rem", 
             overflow: "hidden", 
             border: showPersonalized ? "2px solid var(--primary)" : "2px solid var(--border)",
-            transition: "all 0.3s",
+            transition: "border-color 0.3s",
             width: isMobileView ? "390px" : "100%",
             margin: "0 auto",
             backgroundColor: "#fff",
-            boxShadow: isMobileView ? "0 10px 25px -5px rgba(0, 0, 0, 0.5)" : "none"
+            boxShadow: isMobileView ? "0 10px 25px -5px rgba(0, 0, 0, 0.5)" : "none",
+            position: "relative",
           }}>
-            <iframe 
-              srcDoc={showPersonalized ? result.modifiedHtml : result.originalHtml} 
-              title={showPersonalized ? "Personalized Page" : "Original Page"}
-              sandbox="allow-same-origin allow-scripts"
+            {/* Original iframe — always loaded, hidden when personalized */}
+            <iframe
+              srcDoc={result.originalHtml}
+              title="Original Page"
+              sandbox="allow-scripts"
               style={{
                 width: "100%",
                 height: isMobileView ? "844px" : "80vh",
                 border: "none",
                 background: "#fff",
+                display: showPersonalized ? "none" : "block",
+              }}
+            />
+            {/* Personalized iframe — always loaded, hidden when showing original */}
+            <iframe
+              srcDoc={result.modifiedHtml}
+              title="Personalized Page"
+              sandbox="allow-scripts"
+              style={{
+                width: "100%",
+                height: isMobileView ? "844px" : "80vh",
+                border: "none",
+                background: "#fff",
+                display: showPersonalized ? "block" : "none",
               }}
             />
           </div>
