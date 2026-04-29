@@ -218,7 +218,54 @@ export async function personalizeForAd(
     });
   }
 
+  // 8. Sticky Mobile CTA — only for product pages with a valid CTA
+  if (isProductPage && ctaBlock && bodyBlock) {
+    const stickyCtaText = isHighIntent(ctaText) ? ctaText : (strategy.cta_upgrade || "BUY IT NOW");
+    
+    const stickyMobileHtml = `
+<style>
+  @media (min-width: 768px) { .tp-sticky-cta { display: none !important; } }
+  @media (max-width: 767px) {
+    .tp-sticky-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 2147483647;
+      background: white;
+      padding: 12px 16px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+</style>
+<div data-tp-inject="sticky-cta" class="tp-sticky-cta">
+  <button 
+    onclick="document.querySelector('[data-tp-id=\\'${ctaBlock.id}\\']')?.click();"
+    style="width:100%; background:#e11d48; color:#fff; border:none; padding:14px; border-radius:8px; font-weight:700; font-size:16px; cursor:pointer; letter-spacing:0.5px; box-shadow:0 4px 12px rgba(225,29,72,0.3);"
+  >
+    ${stickyCtaText.toUpperCase()}
+  </button>
+</div>`;
+
+    changes.push({
+      blockId: "block-body",
+      selector: "[data-tp-id='block-body']",
+      action: "add_element",
+      field: "append",
+      originalValue: "",
+      newValue: stickyMobileHtml,
+      croRationale: "Sticky mobile CTA footer ensures conversion point is always reachable on phone view",
+      confidence: 0.96,
+      category: "cta_alignment",
+    });
+  }
+
   console.log(`Executing ${changes.length} personalization changes.`);
+
 
   return {
     changes,
