@@ -228,7 +228,7 @@ export default function Home() {
             <iframe
               srcDoc={result.originalHtml}
               title="Original Page"
-              sandbox="allow-scripts"
+              sandbox="allow-scripts allow-same-origin allow-forms"
               style={{
                 width: "100%",
                 height: isMobileView ? "844px" : "calc(100vh - 110px)",
@@ -241,7 +241,7 @@ export default function Home() {
             <iframe
               srcDoc={result.modifiedHtml}
               title="Personalized Page"
-              sandbox="allow-scripts"
+              sandbox="allow-scripts allow-same-origin allow-forms"
               style={{
                 width: "100%",
                 height: isMobileView ? "844px" : "calc(100vh - 110px)",
