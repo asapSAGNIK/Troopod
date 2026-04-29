@@ -218,48 +218,81 @@ export async function personalizeForAd(
     });
   }
 
-  // 8. Sticky Mobile CTA — only for product pages with a valid CTA
-  if (isProductPage && ctaBlock) {
-    // We inject a <style> block that targets the existing button's unique ID
-    // This makes the EXISTING button stick, rather than adding a new one.
-    const stickyStyleHtml = `
+  // 8. Smart Proxy Clone Mobile CTA
+  if (isProductPage && ctaBlock && bodyBlock) {
+    const stickyCtaText = isHighIntent(ctaText) ? ctaText : (strategy.cta_upgrade || "BUY IT NOW");
+    
+    const smartCloneHtml = `
 <style>
+  @media (min-width: 768px) { .tp-smart-clone-container { display: none !important; } }
   @media (max-width: 767px) {
-    [data-tp-id='${ctaBlock.id}'] {
-      position: fixed !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      z-index: 2147483647 !important;
-      background: #e11d48 !important; 
-      color: white !important;
-      border: none !important;
-      padding: 16px !important;
-      border-radius: 0 !important;
-      margin: 0 !important;
-      font-weight: 700 !important;
-      font-size: 16px !important;
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.2) !important;
-      box-sizing: border-box !important;
-      display: block !important;
-      text-align: center !important;
-      text-transform: uppercase !important;
-      transition: none !important;
+    .tp-smart-clone-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 2147483647;
+      background: white;
+      padding: 12px 16px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      /* Initial state: visible until JS checks */
+      opacity: 1;
+      transform: translateY(0);
     }
-    /* Add padding to body to prevent fixed button from covering content */
-    body { padding-bottom: 60px !important; }
+    .tp-smart-clone-container.tp-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(20px) !important;
+    }
   }
-</style>`;
+</style>
+<div data-tp-inject="smart-clone" class="tp-smart-clone-container" id="tp-smart-clone">
+  <button 
+    onclick="document.querySelector('[data-tp-id=\\'${ctaBlock.id}\\']')?.click();"
+    style="width:100%; background:#e11d48; color:#fff; border:none; padding:14px; border-radius:8px; font-weight:700; font-size:16px; cursor:pointer; letter-spacing:0.5px; box-shadow:0 4px 12px rgba(225,29,72,0.3); text-transform:uppercase;"
+  >
+    ${stickyCtaText}
+  </button>
+</div>
+<script data-tp-inject="smart-clone-script">
+  (function() {
+    // Avoid double initialization
+    if (window.__tpSmartCloneInitialized) return;
+    window.__tpSmartCloneInitialized = true;
+    
+    // Give DOM a moment to settle
+    setTimeout(function() {
+      var originalBtn = document.querySelector('[data-tp-id="${ctaBlock.id}"]');
+      var cloneContainer = document.getElementById('tp-smart-clone');
+      
+      if (!originalBtn || !cloneContainer) return;
+
+      var observer = new IntersectionObserver(function(entries) {
+        // If original button is visible on screen, hide the clone
+        if (entries[0].isIntersecting) {
+          cloneContainer.classList.add('tp-hidden');
+        } else {
+          cloneContainer.classList.remove('tp-hidden');
+        }
+      }, { threshold: 0.1 }); // Trigger when 10% of original is visible
+
+      observer.observe(originalBtn);
+    }, 500);
+  })();
+</script>
+`;
 
     changes.push({
-      blockId: ctaBlock.id,
-      selector: ctaBlock.selector,
+      blockId: "block-body",
+      selector: "[data-tp-id='block-body']",
       action: "add_element",
-      field: "before",
+      field: "append",
       originalValue: "",
-      newValue: stickyStyleHtml,
-      croRationale: "Ensuring the existing CTA is always accessible on mobile via sticky positioning",
-      confidence: 0.95,
+      newValue: smartCloneHtml,
+      croRationale: "Smart Proxy Clone CTA appears on mobile only when original CTA is out of viewport, ensuring constant conversion friction-reduction",
+      confidence: 0.98,
       category: "cta_alignment",
     });
   }
