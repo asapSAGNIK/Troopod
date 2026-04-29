@@ -219,50 +219,51 @@ export async function personalizeForAd(
   }
 
   // 8. Sticky Mobile CTA — only for product pages with a valid CTA
-  if (isProductPage && ctaBlock && bodyBlock) {
-    const stickyCtaText = isHighIntent(ctaText) ? ctaText : (strategy.cta_upgrade || "BUY IT NOW");
-    
-    const stickyMobileHtml = `
+  if (isProductPage && ctaBlock) {
+    // We inject a <style> block that targets the existing button's unique ID
+    // This makes the EXISTING button stick, rather than adding a new one.
+    const stickyStyleHtml = `
 <style>
-  @media (min-width: 768px) { .tp-sticky-cta { display: none !important; } }
   @media (max-width: 767px) {
-    .tp-sticky-cta {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      z-index: 2147483647;
-      background: white;
-      padding: 12px 16px;
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    [data-tp-id='${ctaBlock.id}'] {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 2147483647 !important;
+      background: #e11d48 !important; 
+      color: white !important;
+      border: none !important;
+      padding: 16px !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      font-weight: 700 !important;
+      font-size: 16px !important;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.2) !important;
+      box-sizing: border-box !important;
+      display: block !important;
+      text-align: center !important;
+      text-transform: uppercase !important;
+      transition: none !important;
     }
+    /* Add padding to body to prevent fixed button from covering content */
+    body { padding-bottom: 60px !important; }
   }
-</style>
-<div data-tp-inject="sticky-cta" class="tp-sticky-cta">
-  <button 
-    onclick="document.querySelector('[data-tp-id=\\'${ctaBlock.id}\\']')?.click();"
-    style="width:100%; background:#e11d48; color:#fff; border:none; padding:14px; border-radius:8px; font-weight:700; font-size:16px; cursor:pointer; letter-spacing:0.5px; box-shadow:0 4px 12px rgba(225,29,72,0.3);"
-  >
-    ${stickyCtaText.toUpperCase()}
-  </button>
-</div>`;
+</style>`;
 
     changes.push({
-      blockId: "block-body",
-      selector: "[data-tp-id='block-body']",
+      blockId: ctaBlock.id,
+      selector: ctaBlock.selector,
       action: "add_element",
-      field: "append",
+      field: "before",
       originalValue: "",
-      newValue: stickyMobileHtml,
-      croRationale: "Sticky mobile CTA footer ensures conversion point is always reachable on phone view",
-      confidence: 0.96,
+      newValue: stickyStyleHtml,
+      croRationale: "Ensuring the existing CTA is always accessible on mobile via sticky positioning",
+      confidence: 0.95,
       category: "cta_alignment",
     });
   }
+
 
   console.log(`Executing ${changes.length} personalization changes.`);
 
