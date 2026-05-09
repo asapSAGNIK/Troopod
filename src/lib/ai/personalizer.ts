@@ -2,6 +2,8 @@ import { getVisionModel, withRetry } from "./gemini-client";
 import { STRATEGY_PROMPT } from "./prompts";
 import { strategyDecisionSchema } from "../validators/changes-schema";
 import { AdAnalysis, PersonalizationResult, ScrapedPage, ChangeInstruction } from "../types";
+import { retrieveContext } from "../rag/retriever";
+import { buildRAGContext } from "../rag/context-builder";
 
 // High-intent CTAs — never downgrade these
 const HIGH_INTENT_CTAS = [
@@ -112,8 +114,26 @@ export async function personalizeForAd(
 </page_context>
 `;
 
+  // --- PHASE 3.5: RAG RETRIEVAL ---
+  const pageType = isProductPage ? "ecommerce" : "landing";
+  let ragContextStr = "";
+  try {
+    const ragResult = await retrieveContext({
+      pageType,
+      industry: undefined, // Future: detect from URL/content
+      adTone: adAnalysis.tone,
+      currentHeadline: headlineBlock?.content,
+    });
+    ragContextStr = buildRAGContext(ragResult);
+    if (ragContextStr) {
+      console.log(`[RAG] Retrieved ${ragResult.croKnowledge.length} CRO docs, ${ragResult.pastCampaigns.length} past campaigns (${ragResult.totalTokensUsed} tokens)`);
+    }
+  } catch (err) {
+    console.warn("[RAG] Retrieval failed, falling back to base prompt:", err);
+  }
+
   const result = await withRetry(() =>
-    model.generateContent([STRATEGY_PROMPT, context])
+    model.generateContent([STRATEGY_PROMPT, ragContextStr, context].filter(Boolean))
   );
 
   const responseText = result.response.text();

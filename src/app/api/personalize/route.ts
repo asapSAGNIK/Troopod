@@ -5,6 +5,7 @@ import { parsePageBlocks } from "@/lib/scraper/dom-parser";
 import { personalizeForAd } from "@/lib/ai/personalizer";
 import { applyChanges } from "@/lib/scraper/dom-modifier";
 import { PersonalizeResponse } from "@/lib/types";
+import { logCampaign } from "@/lib/rag/campaign-logger";
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -77,6 +78,16 @@ export async function POST(req: NextRequest) {
         totalMs
       }
     };
+
+    // Log campaign for RAG learning loop (non-blocking)
+    logCampaign({
+      adAnalysis,
+      pageType: personalization.changes.some(c => c.category === "cta_alignment") ? "ecommerce" : "landing",
+      pageUrl: landingPageUrl,
+      changesApplied: personalization.changes,
+      overallConfidence: personalization.overallConfidence,
+      timestamp: new Date().toISOString(),
+    }).catch(err => console.warn("[RAG] Campaign logging failed:", err));
 
     return NextResponse.json(response);
 

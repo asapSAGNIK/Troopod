@@ -1,0 +1,49 @@
+[
+  {
+    "id": "cro-001",
+    "text": "Baymard Institute: 69.8% of shopping carts are abandoned. Top reasons: extra costs (48%), forced account creation (24%), complex checkout (17%). Simplifying the path from CTA to checkout reduces abandonment by 20-35%.",
+    "category": "cro_knowledge",
+    "industry": "ecommerce",
+    "source": "Baymard Institute 2024"
+  },
+  {
+    "id": "cro-002",
+    "text": "CXL Institute: Adding social proof (reviews, ratings, trust badges) near the primary CTA increases conversion rates by 12-17% on average. Effect is strongest for high-consideration purchases (>$50).",
+    "category": "cro_knowledge",
+    "industry": "ecommerce",
+    "source": "CXL Institute"
+  },
+  {
+    "id": "cro-003",
+    "text": "Google research: A 1-second delay in mobile page load decreases conversions by 20%. Above-the-fold content must render within 2.5 seconds (LCP). Urgency overlays that increase LCP should be lightweight (<5KB).",
+    "category": "cro_knowledge",
+    "source": "Google Web Vitals"
+  },
+  {
+    "id": "cro-004",
+    "text": "NNGroup: Message match between ad copy and landing page headline is the #1 factor in reducing bounce rate from paid traffic. Users who see the same headline on the landing page as the ad are 2.5x more likely to convert.",
+    "category": "cro_knowledge",
+    "source": "Nielsen Norman Group"
+  },
+  {
+    "id": "cro-005",
+    "text": "For SaaS landing pages, countdown timers and urgency messaging DECREASE trust and conversion by 8-12%. SaaS buyers prefer proof of value (case studies, ROI calculators) over time pressure.",
+    "category": "cro_knowledge",
+    "industry": "saas",
+    "source": "Unbounce Conversion Benchmark Report"
+  },
+  {
+    "id": "cro-006",
+    "text": "Sticky mobile CTAs increase mobile conversion rates by 15-25% on ecommerce product pages. The CTA should appear only when the original button scrolls out of viewport to avoid visual clutter.",
+    "category": "cro_knowledge",
+    "industry": "ecommerce",
+    "source": "Baymard Institute Mobile UX"
+  },
+  {
+    "id": "cro-007",
+    "text": "Luxury and premium brands should AVOID aggressive urgency tactics (red countdown bars, 'LIMITED TIME'). Instead use exclusivity language: 'Members Only', 'Curated Selection', 'Reserve Yours'. Urgency on luxury pages decreases perceived value by 30%.",
+    "category": "cro_knowledge",
+    "industry": "fashion",
+    "source": "Luxury Institute"
+  }
+]
